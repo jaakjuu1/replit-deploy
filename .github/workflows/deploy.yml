@@ -24,12 +24,12 @@ jobs:
       - name: List Loaded SSH Keys
         run: ssh-add -l
 
-      # Step 4: Deploy to VPS with SSH_AUTH_SOCK explicitly passed
+      # Step 4: Deploy to VPS using SSH agent (no IdentityAgent)
       - name: Deploy to VPS
         env:
           SSH_AUTH_SOCK: ${{ steps.ssh-agent.outputs.ssh-agent-socket }}
         run: |
-          ssh -T -vvv -o StrictHostKeyChecking=no -o "IdentitiesOnly=yes" -o "IdentityAgent=$SSH_AUTH_SOCK" valuebit-xposter@62.72.20.134 << 'EOF'
+          ssh -T -vvv -o StrictHostKeyChecking=no -o "IdentitiesOnly=yes" valuebit-xposter@62.72.20.134 << 'EOF'
           cd /home/valuebit-xposter/htdocs/xposter.valuebit.net
           git pull origin main
           npm install
