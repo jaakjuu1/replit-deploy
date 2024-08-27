@@ -20,7 +20,7 @@ jobs:
 
       - name: Deploy to VPS
         run: |
-          ssh -o StrictHostKeyChecking=no user@your-vps-ip << 'EOF'
+          ssh -o StrictHostKeyChecking=no valuebit-xposter@62.72.20.134 << 'EOF'
           cd /home/valuebit-xposter/htdocs/xposter.valuebit.net
           git pull origin main
           npm install
