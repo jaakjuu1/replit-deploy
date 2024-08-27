@@ -26,13 +26,13 @@ jobs:
 
       # Step 4: Deploy to VPS with SSH_AUTH_SOCK explicitly passed
       - name: Deploy to VPS
+        env:
+          SSH_AUTH_SOCK: ${{ steps.ssh-agent.outputs.ssh-agent-socket }}
         run: |
-          ssh -T -vvv -o StrictHostKeyChecking=no -o "IdentitiesOnly=yes" -o "IdentityAgent=${SSH_AUTH_SOCK}" valuebit-xposter@62.72.20.134 << 'EOF'
+          ssh -T -vvv -o StrictHostKeyChecking=no -o "IdentitiesOnly=yes" -o "IdentityAgent=$SSH_AUTH_SOCK" valuebit-xposter@62.72.20.134 << 'EOF'
           cd /home/valuebit-xposter/htdocs/xposter.valuebit.net
           git pull origin main
           npm install
           npm run build
           pm2 restart astro-server
           EOF
-        env:
-          SSH_AUTH_SOCK: ${{ steps.ssh-agent.outputs.ssh-agent-socket }}
