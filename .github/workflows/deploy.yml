@@ -1,0 +1,31 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install SSH Key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.VPS_DEPLOY_KEY }}
+
+      - name: Deploy to VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no user@your-vps-ip << 'EOF'
+          cd /home/valuebit-xposter/htdocs/xposter.valuebit.net
+          git pull origin main
+          npm install
+          npm run build
+          pm2 restart astro-server
+          EOF
+        env:
+          SSH_AUTH_SOCK: ${{ steps.ssh-agent.outputs.ssh-agent-socket }}
