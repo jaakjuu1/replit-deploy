@@ -24,10 +24,10 @@ jobs:
       - name: List Loaded SSH Keys
         run: ssh-add -l
 
-      # Step 4: Deploy to VPS with verbose SSH output for troubleshooting
+      # Step 4: Deploy to VPS with SSH_AUTH_SOCK explicitly passed
       - name: Deploy to VPS
         run: |
-          ssh -T -vvv -o StrictHostKeyChecking=no valuebit-xposter@62.72.20.134 << 'EOF'
+          ssh -T -vvv -o StrictHostKeyChecking=no -o "IdentitiesOnly=yes" -o "IdentityAgent=${SSH_AUTH_SOCK}" valuebit-xposter@62.72.20.134 << 'EOF'
           cd /home/valuebit-xposter/htdocs/xposter.valuebit.net
           git pull origin main
           npm install
