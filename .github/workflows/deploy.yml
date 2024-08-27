@@ -12,27 +12,26 @@ jobs:
     steps:
       # Step 1: Check out the latest code
       - name: Checkout code
-        uses: actions/checkout@v3  # Use the latest version
+        uses: actions/checkout@v3  # Latest version
 
-      # Step 2: Set up SSH agent and add SSH key
-      - name: Install SSH Key
-        uses: webfactory/ssh-agent@v0.7.0  # Use the latest version
-        with:
-          ssh-private-key: ${{ secrets.VPS_DEPLOY_KEY }}
-
-      # Step 3: Debug - List loaded SSH keys to verify the key is loaded
-      - name: List Loaded SSH Keys
-        run: ssh-add -l
-
-      # Step 4: Deploy to VPS using SSH agent (no IdentityAgent)
-      - name: Deploy to VPS
-        env:
-          SSH_AUTH_SOCK: ${{ steps.ssh-agent.outputs.ssh-agent-socket }}
+      # Step 2: Create the SSH private key file
+      - name: Create SSH key file
         run: |
-          ssh -T -vvv -o StrictHostKeyChecking=no -o "IdentitiesOnly=yes" valuebit-xposter@62.72.20.134 << 'EOF'
+          echo "${{ secrets.VPS_DEPLOY_KEY }}" > /tmp/vps_deploy_key
+          chmod 600 /tmp/vps_deploy_key
+
+      # Step 3: Deploy to VPS using the key file
+      - name: Deploy to VPS
+        run: |
+          ssh -i /tmp/vps_deploy_key -o StrictHostKeyChecking=no valuebit-xposter@62.72.20.134 << 'EOF'
           cd /home/valuebit-xposter/htdocs/xposter.valuebit.net
           git pull origin main
           npm install
           npm run build
           pm2 restart astro-server
           EOF
+
+      # Step 4: Clean up the SSH key file
+      - name: Clean up
+        run: |
+          shred -u /tmp/vps_deploy_key  # Securely delete the key file
